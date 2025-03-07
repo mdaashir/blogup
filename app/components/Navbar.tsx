@@ -1,7 +1,7 @@
 import React from 'react'
 import Link from "next/link";
 import Image from "next/image";
-import {auth} from "@/auth";
+import {auth, signIn, signOut} from "@/auth";
 
 export const Navbar = async () => {
     const session = await auth();
@@ -13,15 +13,38 @@ export const Navbar = async () => {
                     <Image src="/logo.png" width={144} height={30} alt="Logo"/>
                 </Link>
 
-                <div className="flex items-center gap-5">
+                <div className="flex items-center gap-5 text-black">
                     {session && session?.user ? (
                         <>
                             <Link href="/startup/create">
                                 <span className="cursor-pointer">Create Startup</span>
                             </Link>
-                            <button onClick={() => auth().signOut()}>Sign Out</button>
+
+                            <form action={async () =>  {
+                                'use server'
+
+                                await signOut({redirectTo: '/'});
+                            }}>
+                                <button type="submit">
+                                    Logout
+                                </button>
+                            </form>
+
+                            <Link href={`/user/${session?.user?.id}`}>
+                                <span> {session?.user?.name}</span>
+                            </Link>
                         </>
-                    ) }
+                    ) : (
+                        <form action={async () =>  {
+                            'use server'
+
+                            await signIn('github');
+                        }}>
+                            <button type="submit">
+                                Login
+                            </button>
+                        </form>
+                    )}
                 </div>
             </nav>
         </header>
